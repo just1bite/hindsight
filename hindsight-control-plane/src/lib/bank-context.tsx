@@ -103,7 +103,11 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
       setTotalBanks(response.total ?? 0);
     } catch (error) {
       if (seq !== requestSeq.current) return;
-      console.error("Error loading banks:", error);
+      // A 401 here is the signed-out state, not a failure: the login route renders
+      // inside this provider. Logging it paints a red overlay over the login form.
+      if ((error as { status?: number })?.status !== 401) {
+        console.error("Error loading banks:", error);
+      }
     } finally {
       if (seq === requestSeq.current) setBanksLoading(false);
     }
@@ -181,9 +185,15 @@ export function BankProvider({ children }: { children: React.ReactNode }) {
     }
   }, [pathname]);
 
+  // The login form renders inside this provider, so a mount fetch would run signed
+  // out and 401. Wait for the first authenticated route instead, and still fetch
+  // only once — signing in is a client-side navigation, so this provider survives it.
+  const loadedOnceRef = useRef(false);
   useEffect(() => {
+    if (pathname === "/login" || loadedOnceRef.current) return;
+    loadedOnceRef.current = true;
     loadBanks();
-  }, [loadBanks]);
+  }, [loadBanks, pathname]);
 
   return (
     <BankContext.Provider
