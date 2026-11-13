@@ -524,7 +524,9 @@ export class ControlPlaneClient {
           // "Client Error / Unauthorized" toasts the background fetches raised
           // there read as the login form having failed.
           if (!currentPath.startsWith("/login")) {
-            window.location.href = withBasePath(`/login?returnTo=${encodeURIComponent(currentPath)}`);
+            window.location.href = withBasePath(
+              `/login?returnTo=${encodeURIComponent(currentPath)}`
+            );
           }
           // Carry the status so the catch below treats it as a handled refusal
           // rather than a network failure and skips its toast too.
