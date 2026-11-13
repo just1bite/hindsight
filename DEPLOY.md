@@ -7,22 +7,29 @@ git clone https://github.com/just1bite/hindsight.git
 cd hindsight
 ```
 
-## 2. Install Dependencies
+## 2. Setup
 
-### Option A: Docker (Recommended for Server)
+### Auto-generate Secure .env
 
 ```bash
-# Create .env from template
+# Option A: One-liner (generates all keys automatically)
+LLM_API_KEY="your-llm-key" ./setup-env.sh
+
+# Option B: Manual
 cp .env.example .env
-
-# Generate secure keys
-SECRET=$(openssl rand -hex 32)
+SECRET_KEY=$(openssl rand -hex 32)
 API_KEY=$(openssl rand -hex 32)
-PASSWORD=$(openssl rand -base64 16)
+PASSWORD=$(openssl rand -base64 16 | tr -d '/+=' | cut -c1-16)
+sed -i "s/change-me-to-secure-password/${PASSWORD}/g" .env
+sed -i "s/generate-64-char-random-hex/${SECRET_KEY}/g" .env
+sed -i "s/generate-64-char-random-hex/${API_KEY}/g" .env
+# Note: AUTH_SECRET_KEY and AUTH_API_KEY both use the same placeholder, 
+# so run the sed command twice or use different placeholder names
 
-# Configure .env (replace placeholders)
-# LLM: openai, anthropic, or TokenHarbor (https://tokenharbor.ai/v1)
-# Auth: enable with generated credentials
+# Verify
+grep -E "^AUTH_(SECRET|API)_KEY" .env
+chmod 600 .env
+```
 
 # Deploy
 docker compose -f docker/docker-compose.yml up -d
