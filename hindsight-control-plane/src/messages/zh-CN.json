@@ -2049,6 +2049,10 @@
   "login": {
     "title": "Hindsight 控制面板",
     "description": "输入访问密钥以继续",
+    "username": "用户名",
+    "usernamePlaceholder": "输入用户名",
+    "password": "密码",
+    "passwordPlaceholder": "输入密码",
     "accessKey": "访问密钥",
     "accessKeyPlaceholder": "输入访问密钥",
     "signIn": "登录",

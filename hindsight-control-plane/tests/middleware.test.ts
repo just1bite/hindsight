@@ -39,4 +39,19 @@ describe("middleware session handling", () => {
     const res = await request("/login", false);
     expect(res.headers.get("location")).toBeNull();
   });
+
+  it("protects routes when AUTH_ENABLED and AUTH_PASSWORD are set", async () => {
+    vi.unstubAllEnvs();
+    vi.stubEnv("AUTH_ENABLED", "true");
+    vi.stubEnv("AUTH_PASSWORD", "adminpwd");
+
+    const unauthReq = new NextRequest(new URL("/api/banks", "http://localhost:9999"));
+    const unauthRes = await middleware(unauthReq);
+    expect(unauthRes.status).toBe(401);
+
+    const authReq = new NextRequest(new URL("/api/banks", "http://localhost:9999"));
+    authReq.cookies.set(ACCESS_KEY_COOKIE, await createSessionToken("adminpwd"));
+    const authRes = await middleware(authReq);
+    expect(authRes.status).toBe(200);
+  });
 });

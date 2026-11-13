@@ -23,7 +23,11 @@ const PUBLIC_PATTERNS = [
 const intlMiddleware = createIntlMiddleware(routing);
 
 export async function middleware(request: NextRequest) {
-  const accessKey = process.env.HINDSIGHT_CP_ACCESS_KEY;
+  const accessKey =
+    process.env.HINDSIGHT_CP_ACCESS_KEY ||
+    (process.env.AUTH_ENABLED?.toLowerCase() === "true" || !!process.env.AUTH_PASSWORD
+      ? process.env.AUTH_PASSWORD || process.env.AUTH_SECRET_KEY || "hindsight-session-secret"
+      : undefined);
   const { pathname } = request.nextUrl;
   const appPathname = stripBasePath(pathname);
 

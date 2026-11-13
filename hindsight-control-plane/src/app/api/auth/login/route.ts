@@ -8,11 +8,18 @@ import {
   sessionCookieOptions,
 } from "@/lib/auth/session";
 
+// ponytail: single admin user from env; upgrade path: database-backed users table with RBAC.
 export async function POST(request: NextRequest) {
-  const accessKey = process.env.HINDSIGHT_CP_ACCESS_KEY;
+  const adminUser = process.env.AUTH_USERNAME || process.env.HINDSIGHT_AUTH_USERNAME || "admin";
+  const adminPassword =
+    process.env.AUTH_PASSWORD ||
+    process.env.HINDSIGHT_AUTH_PASSWORD ||
+    process.env.HINDSIGHT_CP_ACCESS_KEY;
+  const accessKey =
+    process.env.HINDSIGHT_CP_ACCESS_KEY || adminPassword || process.env.AUTH_SECRET_KEY;
 
-  // If no access key is configured, return 503
-  if (!accessKey) {
+  // If no auth is configured, return 503
+  if (!accessKey && !adminPassword) {
     return NextResponse.json(
       localizeApiErrorPayload(request, {
         error: "Access key not configured",
@@ -22,7 +29,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let body: { key?: string };
+  let body: { key?: string; username?: string; password?: string };
   try {
     body = await request.json();
   } catch {
@@ -35,10 +42,24 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const providedKey = body.key;
+  let isValid = false;
 
-  // Constant-time comparison to prevent timing attacks
-  const isValid = providedKey && constantTimeCompare(providedKey, accessKey);
+  // 1. Check username + password if provided
+  if (body.username && body.password && adminPassword) {
+    isValid =
+      constantTimeCompare(body.username, adminUser) &&
+      constantTimeCompare(body.password, adminPassword);
+  }
+
+  // 2. Fall back to key comparison (or password as key)
+  const candidateKey = body.key || body.password;
+  if (!isValid && candidateKey) {
+    if (accessKey && constantTimeCompare(candidateKey, accessKey)) {
+      isValid = true;
+    } else if (adminPassword && constantTimeCompare(candidateKey, adminPassword)) {
+      isValid = true;
+    }
+  }
 
   if (!isValid) {
     return NextResponse.json(
@@ -50,11 +71,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const sessionSecret = accessKey || adminPassword || "hindsight-session-secret";
   const response = NextResponse.json({ success: true });
 
   response.cookies.set({
     name: ACCESS_KEY_COOKIE,
-    value: await createSessionToken(accessKey),
+    value: await createSessionToken(sessionSecret),
     ...sessionCookieOptions(request),
     maxAge: SESSION_MAX_AGE_SECONDS,
   });

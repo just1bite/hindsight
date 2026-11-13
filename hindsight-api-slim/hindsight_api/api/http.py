@@ -4663,6 +4663,12 @@ def create_app(
     # records the request metrics and attaches X-Ignored-Params for the route class.
     app.add_middleware(HttpObservabilityMiddleware)
 
+    # Authentication router and middleware
+    from hindsight_api.auth import AuthMiddleware, auth_router
+
+    app.include_router(auth_router)
+    app.add_middleware(AuthMiddleware)
+
     _instrument_app_for_tracing(app, config)
 
     return app

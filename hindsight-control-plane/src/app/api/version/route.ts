@@ -21,7 +21,10 @@ export async function GET(request: Request) {
 
     const data = response.data as Record<string, unknown>;
     const features = (data.features ?? {}) as Record<string, boolean>;
-    features.access_key_auth = !!process.env.HINDSIGHT_CP_ACCESS_KEY;
+    features.access_key_auth =
+      !!process.env.HINDSIGHT_CP_ACCESS_KEY ||
+      process.env.AUTH_ENABLED?.toLowerCase() === "true" ||
+      !!process.env.AUTH_PASSWORD;
     data.features = features;
 
     return NextResponse.json(data, { status: 200 });

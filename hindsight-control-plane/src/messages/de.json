@@ -2049,6 +2049,10 @@
   "login": {
     "title": "Hindsight Control Plane",
     "description": "Geben Sie Ihren Zugangsschlüssel ein, um fortzufahren",
+    "username": "Benutzername",
+    "usernamePlaceholder": "Benutzername eingeben",
+    "password": "Passwort",
+    "passwordPlaceholder": "Passwort eingeben",
     "accessKey": "Zugangsschlüssel",
     "accessKeyPlaceholder": "Zugangsschlüssel eingeben",
     "signIn": "Anmelden",

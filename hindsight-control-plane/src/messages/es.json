@@ -2049,6 +2049,10 @@
   "login": {
     "title": "Plano de Control de Hindsight",
     "description": "Introduce tu clave de acceso para continuar",
+    "username": "Usuario",
+    "usernamePlaceholder": "Introduce el usuario",
+    "password": "Password",
+    "passwordPlaceholder": "Introduce la contraseña",
     "accessKey": "Clave de acceso",
     "accessKeyPlaceholder": "Introduce la clave de acceso",
     "signIn": "Iniciar sesión",

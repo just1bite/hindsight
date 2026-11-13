@@ -2049,6 +2049,10 @@
   "login": {
     "title": "Hindsight コントロールプレーン",
     "description": "続行するにはアクセスキーを入力してください",
+    "username": "ユーザー名",
+    "usernamePlaceholder": "ユーザー名を入力",
+    "password": "パスワード",
+    "passwordPlaceholder": "パスワードを入力",
     "accessKey": "アクセスキー",
     "accessKeyPlaceholder": "アクセスキーを入力",
     "signIn": "サインイン",
