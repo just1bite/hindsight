@@ -4,7 +4,7 @@
  */
 export async function register() {
   const dataplaneUrl = process.env.HINDSIGHT_CP_DATAPLANE_API_URL || "http://localhost:8888";
-  const apiKey = process.env.HINDSIGHT_CP_DATAPLANE_API_KEY || "";
+  const apiKey = process.env.HINDSIGHT_CP_DATAPLANE_API_KEY || process.env.AUTH_API_KEY || "";
 
   console.log(`[Control Plane] Connecting to dataplane at: ${dataplaneUrl}`);
   if (apiKey) {

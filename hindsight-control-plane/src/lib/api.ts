@@ -518,13 +518,19 @@ export class ControlPlaneClient {
         // Redirect to login only when the UI session itself was refused. A 401 the
         // dataplane returned is shown as an error: a new UI key can't fix it.
         const currentPath = stripBasePath(`${window.location.pathname}${window.location.search}`);
-        if (
-          response.status === 401 &&
-          response.headers.get(SESSION_REQUIRED_HEADER) &&
-          !currentPath.startsWith("/login")
-        ) {
-          window.location.href = withBasePath(`/login?returnTo=${encodeURIComponent(currentPath)}`);
-          throw new Error("Unauthorized");
+        if (response.status === 401 && response.headers.get(SESSION_REQUIRED_HEADER)) {
+          // Signed out: any in-flight request is moot. On the login page the form
+          // is already on screen, so neither redirect nor toast is wanted — the
+          // "Client Error / Unauthorized" toasts the background fetches raised
+          // there read as the login form having failed.
+          if (!currentPath.startsWith("/login")) {
+            window.location.href = withBasePath(`/login?returnTo=${encodeURIComponent(currentPath)}`);
+          }
+          // Carry the status so the catch below treats it as a handled refusal
+          // rather than a network failure and skips its toast too.
+          const refused = new Error("Unauthorized");
+          (refused as any).status = response.status;
+          throw refused;
         }
 
         // Try to parse error response
