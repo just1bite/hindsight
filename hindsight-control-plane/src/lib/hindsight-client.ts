@@ -13,7 +13,10 @@ import {
 import { version } from "../../package.json";
 
 export const DATAPLANE_URL = process.env.HINDSIGHT_CP_DATAPLANE_API_URL || "http://localhost:8888";
-const DATAPLANE_API_KEY = process.env.HINDSIGHT_CP_DATAPLANE_API_KEY || "";
+// Fall back to AUTH_API_KEY so one shared secret configures both sides when
+// the dataplane runs with AUTH_ENABLED=true.
+const DATAPLANE_API_KEY =
+  process.env.HINDSIGHT_CP_DATAPLANE_API_KEY || process.env.AUTH_API_KEY || "";
 
 /** Sent on every dataplane request so the API can tell control-plane traffic apart. */
 export const USER_AGENT = `hindsight-control-plane/${version}`;

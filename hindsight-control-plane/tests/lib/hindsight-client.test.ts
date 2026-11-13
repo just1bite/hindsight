@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { USER_AGENT, getDataplaneHeaders, lowLevelClient } from "@/lib/hindsight-client";
 import { version } from "../../package.json";
 
@@ -14,5 +14,14 @@ describe("dataplane User-Agent", () => {
     });
     const headers = lowLevelClient.getConfig().headers as Headers;
     expect(headers.get("User-Agent")).toBe(USER_AGENT);
+  });
+
+  it("authorizes with a bearer token when one is configured", async () => {
+    vi.resetModules();
+    vi.stubEnv("HINDSIGHT_CP_DATAPLANE_API_KEY", "");
+    vi.stubEnv("AUTH_API_KEY", "shared-secret");
+    const { getDataplaneHeaders: fresh } = await import("@/lib/hindsight-client");
+    expect(fresh()["Authorization"]).toBe("Bearer shared-secret");
+    vi.unstubAllEnvs();
   });
 });
